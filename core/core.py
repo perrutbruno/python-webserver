@@ -1,25 +1,45 @@
 import socket
+import threading
 
 
 class Core:
-    addr = ("", 3010)
+    sock_addr = ('', 3010)
 
-    listening_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    lis_sock = (socket.AF_INET, socket.SOCK_STREAM)
 
-    listening_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    def initialize_socket_and_server():
+        with socket.socket(Core.lis_sock[0], Core.lis_sock[1]) as s:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind(Core.sock_addr)
+            print(f'LISTENING ON PORT {Core.sock_addr[1]}')
+            s.listen(1)
 
-    listening_socket.bind(addr)
+            while True:
+                # with conn:
+                try:
+                    threading.Thread(name="")
 
-    listening_socket.listen(1)
+                    conn, addr = s.accept()
+                    print('to no try')
+                    req_data = conn.recv(1024)
 
-    def initialize_socket():
-        while True:
-            print('LISTENING ON PORT ')
-            client_connection, client_address = Core.listening_socket.accept()
-            request_data = client_connection.recv(1024)
-            print(request_data.decode('utf-8'))
+                    print(req_data.decode('utf-8'))
+                    http_response = b"""\
+HTTP/1.1 200 OK
+
+Imagine that we have a default webserver page here :p ...!
+"""
+                    conn.sendall(http_response)
+                    conn.close()
+
+                except Exception:
+                    conn.close()
+                    s.accept()
+                finally:
+                    conn.close()
+                    s.accept()
 
 
 core = Core
 
-core.initialize_socket()
+core.initialize_socket_and_server()

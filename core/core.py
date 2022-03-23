@@ -15,7 +15,6 @@ class Core:
             s.listen(1)
 
             while True:
-                # with conn:
                 try:
                     threading.Thread(name="")
 
